@@ -36,10 +36,15 @@ window.Stepper = function() {
     state.sidebar = sidebar;
   }
 
+  var clearAllItems = function() {
+    state.sidebar.clearAllItems();
+  }
+
   return {
     addStep: addStep,
     step: nextStep,
-    setSidebar: setSidebar
+    setSidebar: setSidebar,
+    clearAllItems: clearAllItems
   }
 }
 
@@ -68,19 +73,19 @@ window.onload = function() {
   var checkIcon = Snap('#check-icon');
   var closeIcon = Snap('#close-icon');
   var fileIcon = Snap('#file-icon');
-  var envelopeIcon = Snap('#envelope-icon');
+  var clientIcon = Snap('#client-icon');
   var securityGateLeft = paper.image('security-gate-left.png', 630, 60, 100, 100);
   var securityGateRight = paper.image('security-gate-right.png', 279, 60, 100, 100);
   var securityGate = [ securityGateLeft, securityGateRight ];
   var databaseIcon = Snap('#database').attr({ height: 150, width: 150, x: -150, y: 300 });
   fileIcon.attr({ x: 260, y: 120, opacity: 0 });
-  envelopeIcon.attr({ width: 50, height:50, x: -150, y: 300 });
+  clientIcon.attr({ width: 50, height:50, x: -150, y: 300 });
 
   paper.rect(0, 0, 600, 480).attr({ fill: '#EEE', stroke: '#CCC', strokeWidth: 1 });
 
   paper.append(databaseIcon);
   paper.append(fileIcon);
-  paper.append(envelopeIcon);
+  paper.append(clientIcon);
 
   // BL box & gears
   var blBox = [];
@@ -126,9 +131,6 @@ window.onload = function() {
   // Add sidebar
   var sidebarGroup;
   var Sidebar = function() {
-    // sidebarGroup = paper.group().attr({ filter: shadowFilter });
-    // sidebarGroup.add(paper.rect(700, 25, 250, 600).attr({ fill: '#ffc107' }));
-
     var items = {};
     var itemCount = 0;
     var itemHeight = 30;
@@ -166,6 +168,11 @@ window.onload = function() {
       markItem: function(key, success) {
         console.log(key + '-label')
         document.getElementById(key + '-label').innerHTML = '<i class="material-icons">' + (success ? 'check' : 'close') + '</i>'
+      },
+      clearAllItems: function() {
+        document.getElementById('step-list').innerHTML = '';
+        items = {};
+        itemCount = 0;
       }
     }
   }
@@ -261,6 +268,8 @@ window.onload = function() {
     try {
       steps = JSON.parse(steps);
     } catch (e) {}
+    
+    stepper.clearAllItems();
 
     stepper.addStep('new_request', function(done) {
       requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
@@ -313,41 +322,41 @@ window.onload = function() {
     });
   });
 
-  // // Generate request ID
-  // stepper.addStep('request_id', function(done) {
-  //   var requestId = {}
-  //   requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
-  //   requestId.idText = paper.text(30, 130, 'ID');
-  //   requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
-  //   requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
-  //     requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
-  //       requestId.rect.attr({ filter: '' });
-  //       requestGroup.add(requestId.group);
-  //       requestId.rect.animate({ fill: '#42a5f5' }, 250, function() {
-  //         done(true);
-  //       });
-  //     });
-  //   });
-  // });
+//   // Generate request ID
+//   stepper.addStep('request_id', function(done) {
+//     var requestId = {}
+//     requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
+//     requestId.idText = paper.text(30, 130, 'ID');
+//     requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
+//     requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+//       requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
+//         requestId.rect.attr({ filter: '' });
+//         requestGroup.add(requestId.group);
+//         requestId.rect.animate({ fill: '#42a5f5' }, 250, function() {
+//           done(true);
+//         });
+//       });
+//     });
+//   });
 
-  // // Parse request body
-  // var jsonText;
-  // stepper.addStep('parse_body', function(done) {
-  //   jsonText = paper.text(257, 130, '{ ... }');
-  //   requestGroup.add(jsonText);
-  //   var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
-  //   var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
-  //   scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
-  //     scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
-  //       textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
-  //       scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
-  //         scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
-  //           done(true);
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+//   // Parse request body
+//   var jsonText;
+//   stepper.addStep('parse_body', function(done) {
+//     jsonText = paper.text(257, 130, '{ ... }');
+//     requestGroup.add(jsonText);
+//     var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
+//     var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
+//     scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+//       scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
+//         textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
+//         scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
+//           scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
+//             done(true);
+//           });
+//         });
+//       });
+//     });
+//   });
 
 // // Validate credentials
 //   stepper.addStep('authentication', function(done) {
@@ -371,53 +380,53 @@ window.onload = function() {
 //     }, 6000);
 //   });
 
-  // // Data access
-  // stepper.addStep('save_data', function(done) {
-  //   if (jsonText) jsonText.animate({ opacity: 0 }, 400, mina.easein);
-  //   databaseIcon.animate({ x: 200 }, 500, mina.easeout, function() {
-  //     var databaseIconBounceDelta = 5;
-  //     databaseIconBounce = function() {
-  //       databaseIcon.animate({ y: 300 + databaseIconBounceDelta }, 1000, mina.easeinout, databaseIconBounce);
-  //       databaseIconBounceDelta = databaseIconBounceDelta * -1;
-  //     }
-  //     databaseIconBounce();
-  //     fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
-  //       fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
-  //         fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
-  //           databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-  //             done(true);
-  //           });
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+//   // Data access
+//   stepper.addStep('save_data', function(done) {
+//     if (jsonText) jsonText.animate({ opacity: 0 }, 400, mina.easein);
+//     databaseIcon.animate({ x: 200 }, 500, mina.easeout, function() {
+//       var databaseIconBounceDelta = 5;
+//       databaseIconBounce = function() {
+//         databaseIcon.animate({ y: 300 + databaseIconBounceDelta }, 1000, mina.easeinout, databaseIconBounce);
+//         databaseIconBounceDelta = databaseIconBounceDelta * -1;
+//       }
+//       databaseIconBounce();
+//       fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
+//         fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
+//           fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
+//             databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
+//               done(true);
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
 
-  // // Post-hook BL
-  // stepper.addStep('posthook', function(done) {
-  //   blGroup.transform('t500,-370');
-  //   blFrontGroup.transform('t500,-370')
-  //   blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
-  //   blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+//   // Post-hook BL
+//   stepper.addStep('posthook', function(done) {
+//     blGroup.transform('t500,-370');
+//     blFrontGroup.transform('t500,-370')
+//     blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+//     blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 
-  //   setTimeout(function() {
-  //     done(true);
-  //   }, 6000);
-  // });
+//     setTimeout(function() {
+//       done(true);
+//     }, 6000);
+//   });
   
   // // Send response back to client
   // stepper.addStep('response', function(done) {
-  //   envelopeIcon.animate({ x: 240 }, 500, mina.easeout, function() {
-  //     var envelopeIconBounceDelta = 5;
-  //     envelopeIconBounce = function() {
-  //       envelopeIcon.animate({ y: 300 + envelopeIconBounceDelta }, 1000, mina.easeinout, envelopeIconBounce);
-  //       envelopeIconBounceDelta = envelopeIconBounceDelta * -1;
+  //   clientIcon.animate({ x: 251 }, 500, mina.easeout, function() {
+  //     var clientIconBounceDelta = 5;
+  //     clientIconBounce = function() {
+  //       clientIcon.animate({ y: 300 + clientIconBounceDelta }, 1000, mina.easeinout, clientIconBounce);
+  //       clientIconBounceDelta = clientIconBounceDelta * -1;
   //     }
-  //     envelopeIconBounce();
+  //     clientIconBounce();
   //     requestGroup.animate({ transform: 's0.1' }, 750, mina.linear, function() {
   //       requestGroup.animate({ transform: 't0,200s0.1' }, 2000, mina.easeinout, function() {
   //         requestGroup.animate({ opacity: 0 }, 500, mina.easeinout, function() {
-  //           envelopeIcon.animate({ x: 630 }, 500, mina.easeout, function() {
+  //           clientIcon.animate({ x: 630 }, 500, mina.easeout, function() {
   //             done(true);
   //           });
   //         });
