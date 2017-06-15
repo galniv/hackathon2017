@@ -162,7 +162,9 @@ window.onload = function() {
         document.getElementById('step-list').innerHTML += '' +
             '<div class="list-group-item">' +
               '<div class="row-action-primary checkbox">' +
-                '<label id="' + key + '-label"></label>' +
+                '<label id="' + key + '-label">' +
+                  '<i class="material-icons grey">content</i>' +
+                '</label>' +
               '</div>' +
               '<div class="row-content">' +
                 '<h5 class="list-group-item-heading">' + title + '</h5>' +
@@ -279,7 +281,7 @@ window.onload = function() {
     try {
       steps = JSON.parse(steps);
     } catch (e) {}
-    
+
     stepper.clearAllItems();
     document.getElementById('start-button').classList.add('disabled');
 
@@ -288,7 +290,7 @@ window.onload = function() {
         done(true);
       });
     });
-    
+
     steps.forEach(function(step) {
       switch (step.key) {
         case 'request_id':
@@ -518,7 +520,7 @@ window.onload = function() {
 //       done(true);
 //     }, 6000);
 //   });
-  
+
 //   // Send response back to client
 //   stepper.addStep('response', function(done) {
 //     clientIcon.animate({ x: 251 }, 500, mina.easeout, function() {
