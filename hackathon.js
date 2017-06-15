@@ -8,9 +8,9 @@ window.Stepper = function() {
 
 
 
-  var addStep = function(title, stepFunction) {
-    state.sidebar.addItem(title);
-    steps.push({ title: title, stepFunction: stepFunction });
+  var addStep = function(key, stepFunction) {
+    state.sidebar.addItem(key);
+    steps.push({ key: key, stepFunction: stepFunction });
   };
 
   var nextStep = function() {
@@ -22,7 +22,7 @@ window.Stepper = function() {
     if (state.currentStep < steps.length) {
       state.executing = true;
       steps[state.currentStep].stepFunction(function(success){
-        state.sidebar.markItem(steps[state.currentStep].title, success);
+        state.sidebar.markItem(steps[state.currentStep].key, success);
         state.executing = false;
         state.currentStep += 1;
         if (state.waiting) {
@@ -59,6 +59,8 @@ window.setAll = function(elementArray, properties, animate, animationDuration) {
 }
 
 window.onload = function() {
+  $.material.init()
+
   // Load assets
   var paper = Snap("#svg");
   var shadowFilter = Snap('#drop-shadow');
@@ -73,6 +75,8 @@ window.onload = function() {
   paper.append(databaseIcon);
   paper.append(fileIcon);
   fileIcon.attr({ x: 260, y: 130, opacity: 0 });
+
+  paper.rect(0, 0, 600, 480).attr({ fill: '#EEE', stroke: '#CCC', strokeWidth: 1 });
 
   // BL box & gears
   var blBox = [];
@@ -118,8 +122,8 @@ window.onload = function() {
   // Add sidebar
   var sidebarGroup;
   var Sidebar = function() {
-    sidebarGroup = paper.group().attr({ filter: shadowFilter });
-    sidebarGroup.add(paper.rect(700, 25, 250, 600).attr({ fill: '#ffc107' }));
+    // sidebarGroup = paper.group().attr({ filter: shadowFilter });
+    // sidebarGroup.add(paper.rect(700, 25, 250, 600).attr({ fill: '#ffc107' }));
 
     var items = {};
     var itemCount = 0;
@@ -127,22 +131,33 @@ window.onload = function() {
     var itemGap = 10;
     var textPadding = 10;
 
+    var keyTitleMap = {
+      new_request: 'New request comes in',
+      request_id: 'Generate request ID',
+      parse_body: 'Parse request body',
+      authentication: 'Verify credentials'
+    };
+
     return {
-      addItem: function(title) {
-        items[title] = paper.group().attr({ filter: shadowFilter });
-        items[title].add(paper.rect(715, 40 + (itemCount * (itemHeight + itemGap)), 220, itemHeight).attr({ fill: '#ffb74d' }));
-        items[title].add(paper.text(745, 50 + (itemCount * (itemHeight + itemGap)) + textPadding, title));
-        sidebarGroup.add(items[title]);
+      addItem: function(key) {
+        var title = keyTitleMap[key] || 'Unknown';
+        document.getElementById('step-list').innerHTML += '' +
+            '<div class="list-group-item">' +
+              '<div class="row-action-primary checkbox">' +
+                '<label id="' + key + '-label"></label>' +
+              '</div>' +
+              '<div class="row-content">' + 
+                '<h5 class="list-group-item-heading">' + title + '</h5>' +
+                '</div></div>'
+        // items[title] = paper.group().attr({ filter: shadowFilter });
+        // items[title].add(paper.rect(715, 40 + (itemCount * (itemHeight + itemGap)), 220, itemHeight).attr({ fill: '#ffb74d' }));
+        // items[title].add(paper.text(745, 50 + (itemCount * (itemHeight + itemGap)) + textPadding, title));
+        // sidebarGroup.add(items[title]);
         itemCount += 1;
       },
-      markItem: function(title, success) {
-        setTimeout(function() {
-          var itemBoundingBox = items[title].getBBox();
-          items[title].add(Snap(success ? checkIcon.clone() : closeIcon.clone()).attr({ x: 718, y: itemBoundingBox.y2 - itemBoundingBox.height + 3 }));
-          items[title][0].animate({ fill: '#ffd180' }, 200, mina.easeout, function() {
-            items[title][0].animate({ fill: '#ffb74d' }, 200, mina.easeout);
-          });
-        }, 100);
+      markItem: function(key, success) {
+        console.log(key + '-label')
+        document.getElementById(key + '-label').innerHTML = '<i class="material-icons">' + (success ? 'check' : 'close') + '</i>'
       }
     }
   }
@@ -230,12 +245,6 @@ window.onload = function() {
   blFrontGroup.before(conveyorBelt[0]);
   blFrontGroup.before(conveyorBelt[1]);
 
-  stepper.addStep('Request comes in', function(done) {
-    requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
-      done(true);
-    });
-  });
-
   stepper.loadSteps = function() {
     var textarea = document.getElementById('steps');
     var steps = textarea.value;
@@ -244,7 +253,7 @@ window.onload = function() {
       steps = JSON.parse(steps);
     } catch (e) {}
 
-    stepper.addStep('New Request', function(done) {
+    stepper.addStep('new_request', function(done) {
       requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
         done(true);
       });
@@ -252,7 +261,7 @@ window.onload = function() {
 
     steps.forEach(function(step) {
       if (step.key === 'request_id') {
-        stepper.addStep(step.title, function(done) {
+        stepper.addStep(step.key, function(done) {
           document.getElementById('step-metadata').innerHTML = 'Request id: ' + step.id;
 
           var requestId = {}
@@ -270,7 +279,7 @@ window.onload = function() {
           });
         });
       } else if (step.key === 'authentication') {
-        stepper.addStep(step.title, function(done) {
+        stepper.addStep(step.key, function(done) {
           if (step.error) {
             document.getElementById('step-metadata').innerHTML = 'Authentication error: ' + step.error.kcs.debug;
           } else {
@@ -367,6 +376,6 @@ window.onload = function() {
 //     });
 //   });
 
-  var canvasEdge = paper.rect(600, 25, 350, 600).attr({ fill: 'white' });
-  canvasEdge.after(sidebarGroup);
+  // var canvasEdge = paper.rect(600, 25, 350, 600).attr({ fill: '#EEE' });
+  // canvasEdge.after(sidebarGroup);
 };
