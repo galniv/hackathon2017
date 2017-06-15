@@ -72,11 +72,12 @@ window.onload = function() {
   var securityGateRight = paper.image('security-gate-right.png', 279, 60, 100, 100);
   var securityGate = [ securityGateLeft, securityGateRight ];
   var databaseIcon = Snap('#database').attr({ height: 150, width: 150, x: -150, y: 300 });
-  paper.append(databaseIcon);
-  paper.append(fileIcon);
-  fileIcon.attr({ x: 260, y: 130, opacity: 0 });
+  fileIcon.attr({ x: 260, y: 120, opacity: 0 });
 
   paper.rect(0, 0, 600, 480).attr({ fill: '#EEE', stroke: '#CCC', strokeWidth: 1 });
+
+  paper.append(databaseIcon);
+  paper.append(fileIcon);
 
   // BL box & gears
   var blBox = [];
@@ -135,7 +136,10 @@ window.onload = function() {
       new_request: 'New request comes in',
       request_id: 'Generate request ID',
       parse_body: 'Parse request body',
-      authentication: 'Verify credentials'
+      authentication: 'Verify credentials',
+      prehook: 'Business Logic pre-hook',
+      save_data: 'Save data',
+      posthook: 'Business Logic post-hook'
     };
 
     return {
@@ -168,6 +172,7 @@ window.onload = function() {
   var requestRect = paper.rect(200, -100, 150, 50).attr({ fill: '#2196f3' });
   requestGroup.add(requestRect);
   blFrontGroup.before(requestGroup);
+  fileIcon.before(requestGroup);
 
   // Security gate
   var securityGateLights = paper.group();
@@ -298,8 +303,14 @@ window.onload = function() {
     });
   };
 
+  stepper.addStep('new_request', function(done) {
+    requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
+      done(true);
+    });
+  });
+
 //   // Generate request ID
-//   stepper.addStep('Generate request ID', function(done) {
+//   stepper.addStep('request_id', function(done) {
 //     var requestId = {}
 //     requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
 //     requestId.idText = paper.text(30, 130, 'ID');
@@ -315,26 +326,27 @@ window.onload = function() {
 //     });
 //   });
 
-//   // Parse request body
-//   stepper.addStep('Parse request body', function(done) {
-//     var jsonText = paper.text(257, 130, '{ ... }');
-//     requestGroup.add(jsonText);
-//     var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
-//     var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
-//     scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
-//       scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
-//         textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
-//         scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
-//           scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
-//             done(true);
-//           });
-//         });
-//       });
-//     });
-//   });
+  // // Parse request body
+  // var jsonText;
+  // stepper.addStep('parse_body', function(done) {
+  //   jsonText = paper.text(257, 130, '{ ... }');
+  //   requestGroup.add(jsonText);
+  //   var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
+  //   var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
+  //   scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+  //     scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
+  //       textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
+  //       scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
+  //         scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
+  //           done(true);
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 
 // // Validate credentials
-//   stepper.addStep('Validate credentials', function(done) {
+//   stepper.addStep('authentication', function(done) {
 //     securityGateLights.blink();
 //     animateBelt();
 //     securityGateGroup.animate({ transform: 't-400' }, 10000, mina.linear)
@@ -346,7 +358,7 @@ window.onload = function() {
 //   });
 
 //   // Pre-hook BL
-//   stepper.addStep('Business Logic pre-hook', function(done) {
+//   stepper.addStep('prehook', function(done) {
 //     blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 //     blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 
@@ -355,27 +367,39 @@ window.onload = function() {
 //     }, 6000);
 //   });
 
-//   // Data access
-//   stepper.addStep('Save data', function(done) {
-//     databaseIcon.animate({ x: 200 }, 500, mina.easeout, function() {
-//       var databaseIconBounceDelta = 5;
-//       databaseIconBounce = function() {
-//         databaseIcon.animate({ y: 300 + databaseIconBounceDelta }, 1000, mina.easeinout, databaseIconBounce);
-//         databaseIconBounceDelta = databaseIconBounceDelta * -1;
-//       }
-//       databaseIconBounce();
-//       fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
-//         fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
-//           fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
-//             databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-//               done(true);
-//             });
-//           });
-//         });
-//       });
-//     });
-//   });
+  // // Data access
+  // stepper.addStep('save_data', function(done) {
+  //   if (jsonText) jsonText.animate({ opacity: 0 }, 400, mina.easein);
+  //   databaseIcon.animate({ x: 200 }, 500, mina.easeout, function() {
+  //     var databaseIconBounceDelta = 5;
+  //     databaseIconBounce = function() {
+  //       databaseIcon.animate({ y: 300 + databaseIconBounceDelta }, 1000, mina.easeinout, databaseIconBounce);
+  //       databaseIconBounceDelta = databaseIconBounceDelta * -1;
+  //     }
+  //     databaseIconBounce();
+  //     fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
+  //       fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
+  //         fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
+  //           databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
+  //             done(true);
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 
-  // var canvasEdge = paper.rect(600, 25, 350, 600).attr({ fill: '#EEE' });
-  // canvasEdge.after(sidebarGroup);
+  // // Post-hook BL
+  // stepper.addStep('posthook', function(done) {
+  //   blGroup.transform('t500,-370');
+  //   blFrontGroup.transform('t500,-370')
+  //   blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+  //   blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+
+  //   setTimeout(function() {
+  //     done(true);
+  //   }, 6000);
+  // });
+
+  
 };
