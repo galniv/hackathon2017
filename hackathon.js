@@ -68,16 +68,19 @@ window.onload = function() {
   var checkIcon = Snap('#check-icon');
   var closeIcon = Snap('#close-icon');
   var fileIcon = Snap('#file-icon');
+  var envelopeIcon = Snap('#envelope-icon');
   var securityGateLeft = paper.image('security-gate-left.png', 630, 60, 100, 100);
   var securityGateRight = paper.image('security-gate-right.png', 279, 60, 100, 100);
   var securityGate = [ securityGateLeft, securityGateRight ];
   var databaseIcon = Snap('#database').attr({ height: 150, width: 150, x: -150, y: 300 });
   fileIcon.attr({ x: 260, y: 120, opacity: 0 });
+  envelopeIcon.attr({ width: 50, height:50, x: -150, y: 300 });
 
   paper.rect(0, 0, 600, 480).attr({ fill: '#EEE', stroke: '#CCC', strokeWidth: 1 });
 
   paper.append(databaseIcon);
   paper.append(fileIcon);
+  paper.append(envelopeIcon);
 
   // BL box & gears
   var blBox = [];
@@ -309,22 +312,22 @@ window.onload = function() {
     });
   });
 
-//   // Generate request ID
-//   stepper.addStep('request_id', function(done) {
-//     var requestId = {}
-//     requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
-//     requestId.idText = paper.text(30, 130, 'ID');
-//     requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
-//     requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
-//       requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
-//         requestId.rect.attr({ filter: '' });
-//         requestGroup.add(requestId.group);
-//         requestId.rect.animate({ fill: '#42a5f5' }, 250, function() {
-//           done(true);
-//         });
-//       });
-//     });
-//   });
+  // // Generate request ID
+  // stepper.addStep('request_id', function(done) {
+  //   var requestId = {}
+  //   requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
+  //   requestId.idText = paper.text(30, 130, 'ID');
+  //   requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
+  //   requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+  //     requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
+  //       requestId.rect.attr({ filter: '' });
+  //       requestGroup.add(requestId.group);
+  //       requestId.rect.animate({ fill: '#42a5f5' }, 250, function() {
+  //         done(true);
+  //       });
+  //     });
+  //   });
+  // });
 
   // // Parse request body
   // var jsonText;
@@ -401,5 +404,23 @@ window.onload = function() {
   //   }, 6000);
   // });
 
-  
+  // stepper.addStep('posthook', function(done) {
+  //   envelopeIcon.animate({ x: 240 }, 500, mina.easeout, function() {
+  //     var envelopeIconBounceDelta = 5;
+  //     envelopeIconBounce = function() {
+  //       envelopeIcon.animate({ y: 300 + envelopeIconBounceDelta }, 1000, mina.easeinout, envelopeIconBounce);
+  //       envelopeIconBounceDelta = envelopeIconBounceDelta * -1;
+  //     }
+  //     envelopeIconBounce();
+  //     requestGroup.animate({ transform: 's0.1' }, 750, mina.linear, function() {
+  //       requestGroup.animate({ transform: 't0,200s0.1' }, 2000, mina.easeinout, function() {
+  //         requestGroup.animate({ opacity: 0 }, 500, mina.easeinout, function() {
+  //           envelopeIcon.animate({ x: 630 }, 500, mina.easeout, function() {
+  //             done(true);
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // });
 };
