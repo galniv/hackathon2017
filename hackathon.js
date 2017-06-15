@@ -281,6 +281,7 @@ window.onload = function() {
     } catch (e) {}
     
     stepper.clearAllItems();
+    document.getElementById('start-button').classList.add('disabled');
 
     stepper.addStep('new_request', function(done) {
       requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
@@ -320,7 +321,7 @@ window.onload = function() {
                 textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
                 scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
                   scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
-                    done(true);
+                    done(step.error ? false : true);
                   });
                 });
               });
@@ -350,7 +351,7 @@ window.onload = function() {
             blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 
             setTimeout(function() {
-              done(true);
+              done(step.error ? false : true);
             }, 6000);
           });
           break;
@@ -368,7 +369,7 @@ window.onload = function() {
                 fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
                   fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
                     databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-                      done(true);
+                      done(step.error ? false : true);
                     });
                   });
                 });
@@ -384,7 +385,7 @@ window.onload = function() {
             blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 
             setTimeout(function() {
-              done(true);
+              done(step.error ? false : true);
             }, 6000);
           });
           break;
@@ -401,7 +402,7 @@ window.onload = function() {
                 requestGroup.animate({ transform: 't0,200s0.1' }, 2000, mina.easeinout, function() {
                   requestGroup.animate({ opacity: 0 }, 500, mina.easeinout, function() {
                     clientIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-                      done(true);
+                      done(step.error ? false : true);
                     });
                   });
                 });
