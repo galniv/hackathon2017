@@ -18,5 +18,5 @@
 	left: 0;
 }
 
-.material-icons.red { color: #ff0000; }
-.material-icons.green { color: #00cc00; }
+.material-icons.red { background: #f44336 !important; }
+.material-icons.green { background: #4caf50 !important; }

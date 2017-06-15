@@ -4,7 +4,6 @@ window.Stepper = function() {
     currentStep: 0,
     executing: false,
     waiting: false,
-    failed: false
   };
 
 
@@ -15,7 +14,6 @@ window.Stepper = function() {
   };
 
   var nextStep = function() {
-    if (state.failed) return
     if (state.executing) {
       state.waiting = true;
       return
@@ -28,7 +26,7 @@ window.Stepper = function() {
         state.executing = false;
         state.currentStep += 1;
         if (!success) {
-          state.failed = true;
+          state.currentStep = steps.length - 1;
           return
         }
         if (state.waiting) {
@@ -260,7 +258,9 @@ window.onload = function() {
   conveyorBelt.push(line);
   conveyorBelt.push(paper.line(0, 155, 610, 155).attr({ stroke: '#f1582c', strokeWidth: 5 }));
   var lastOffsetValue = 0;
+  var errorEncountered = false;
   animateBelt = function() {
+    if (errorEncountered) return
     Snap.animate(lastOffsetValue, lastOffsetValue-50, function(offsetValue){
       line.attr({ 'strokeDashoffset': offsetValue })
       lastOffsetValue = offsetValue % 400;
@@ -330,19 +330,27 @@ window.onload = function() {
           break;
         case 'authentication':
           stepper.addStep(step.key, function(done) {
-            if (step.error) {
-              document.getElementById('step-metadata').innerHTML = 'Authentication error: ' + step.error.kcs.debug;
-            } else {
-              document.getElementById('step-metadata').innerHTML = 'Authentication succeded';
-            }
             securityGateLights.blink();
             animateBelt();
-            securityGateGroup.animate({ transform: 't-400' }, 10000, mina.linear)
-            leftGroup.animate({ transform: 't-750' }, 10000, mina.linear)
-            setTimeout(function() {
-              securityGateLights.stopBlink(step.error ? true : false);
-              done(step.error ? false : true);
-            }, 6000);
+            if (true) {
+              document.getElementById('step-metadata').innerHTML = 'Authentication error: ' + step.error.kcs.debug;
+              securityGateGroup.animate({ transform: 't-25' }, 5000, mina.linear)
+              leftGroup.animate({ transform: 't-375' }, 5000, mina.linear, function() {
+                errorEncountered = true;
+              });
+              setTimeout(function() {
+                securityGateLights.stopBlink(step.error ? true : false);
+                done(step.error ? false : true);
+              }, 4000);
+            } else {
+              document.getElementById('step-metadata').innerHTML = 'Authentication succeded';
+              securityGateGroup.animate({ transform: 't-400' }, 10000, mina.linear)
+              leftGroup.animate({ transform: 't-750' }, 10000, mina.linear)
+              setTimeout(function() {
+                securityGateLights.stopBlink(step.error ? true : false);
+                done(step.error ? false : true);
+              }, 6000);
+            }
           });
           break;
         case 'prehook':
