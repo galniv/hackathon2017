@@ -142,7 +142,8 @@ window.onload = function() {
       authentication: 'Verify credentials',
       prehook: 'Business Logic pre-hook',
       save_data: 'Save data',
-      posthook: 'Business Logic post-hook'
+      posthook: 'Business Logic post-hook',
+      response: 'Send response to client'
     };
 
     return {
@@ -403,8 +404,9 @@ window.onload = function() {
   //     done(true);
   //   }, 6000);
   // });
-
-  // stepper.addStep('posthook', function(done) {
+  
+  // // Send response back to client
+  // stepper.addStep('response', function(done) {
   //   envelopeIcon.animate({ x: 240 }, 500, mina.easeout, function() {
   //     var envelopeIconBounceDelta = 5;
   //     envelopeIconBounce = function() {
