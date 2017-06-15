@@ -172,8 +172,8 @@ window.onload = function() {
   // Security gate
   var securityGateLights = paper.group();
   var lightLeft = paper.group().append(Snap('#security-gate-light'));
-  lightLeft.transform('t202,-180s0.1');
-  var lightRight = lightLeft.clone().transform('t-75,-180s-.1,.1');
+  lightLeft.transform('t382,-70s0.1');
+  var lightRight = lightLeft.clone().transform('t99,-70s-.1,.1');
   securityGateLights.add(lightLeft)
   securityGateLights.add(lightRight);
   securityGate.push(lightLeft);
