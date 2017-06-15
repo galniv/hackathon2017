@@ -154,7 +154,7 @@ window.onload = function() {
               '<div class="row-action-primary checkbox">' +
                 '<label id="' + key + '-label"></label>' +
               '</div>' +
-              '<div class="row-content">' + 
+              '<div class="row-content">' +
                 '<h5 class="list-group-item-heading">' + title + '</h5>' +
                 '</div></div>'
         // items[title] = paper.group().attr({ filter: shadowFilter });
@@ -165,7 +165,7 @@ window.onload = function() {
       },
       markItem: function(key, success) {
         console.log(key + '-label')
-        document.getElementById(key + '-label').innerHTML = '<i class="material-icons">' + (success ? 'check' : 'close') + '</i>'
+        document.getElementById(key + '-label').innerHTML = '<i class="material-icons ' + (success ? 'green' : 'red') + '">' + (success ? 'check' : 'close') + '</i>'
       }
     }
   }
@@ -261,12 +261,6 @@ window.onload = function() {
     try {
       steps = JSON.parse(steps);
     } catch (e) {}
-
-    stepper.addStep('new_request', function(done) {
-      requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
-        done(true);
-      });
-    });
 
     steps.forEach(function(step) {
       if (step.key === 'request_id') {
@@ -404,7 +398,7 @@ window.onload = function() {
   //     done(true);
   //   }, 6000);
   // });
-  
+
   // // Send response back to client
   // stepper.addStep('response', function(done) {
   //   envelopeIcon.animate({ x: 240 }, 500, mina.easeout, function() {
