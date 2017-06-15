@@ -65,9 +65,14 @@ window.onload = function() {
   var raisedShadowFilter = Snap('#drop-shadow-raise');
   var checkIcon = Snap('#check-icon');
   var closeIcon = Snap('#close-icon');
+  var fileIcon = Snap('#file-icon');
   var securityGateLeft = paper.image('security-gate-left.png', 630, 60, 100, 100);
   var securityGateRight = paper.image('security-gate-right.png', 279, 60, 100, 100);
   var securityGate = [ securityGateLeft, securityGateRight ];
+  var databaseIcon = Snap('#database').attr({ height: 150, width: 150, x: -150, y: 300 });
+  paper.append(databaseIcon);
+  paper.append(fileIcon);
+  fileIcon.attr({ x: 260, y: 130, opacity: 0 });
 
   // BL box & gears
   var blBox = [];
@@ -102,7 +107,6 @@ window.onload = function() {
   mask.append(paper.circle(blStartX + 120, blStartY + 110, 50).attr({ opacity: 0.5, fill: 'black' }));
   frontWall.attr({ mask: mask })
 
-  // setAll(blBox, { opacity: 0 });
   blGroup = paper.group();
   for (var i=0; i < blBox.length; i++) {
     blGroup.add(blBox[i]);
@@ -148,7 +152,7 @@ window.onload = function() {
   requestGroup = paper.group().attr({ filter: shadowFilter });
   var requestRect = paper.rect(200, -100, 150, 50).attr({ fill: '#2196f3' });
   requestGroup.add(requestRect);
-  blFrontGroup.before(requestRect);
+  blFrontGroup.before(requestGroup);
 
   // Security gate
   var securityGateLights = paper.group();
@@ -226,6 +230,12 @@ window.onload = function() {
   blFrontGroup.before(conveyorBelt[0]);
   blFrontGroup.before(conveyorBelt[1]);
 
+  stepper.addStep('Request comes in', function(done) {
+    requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
+      done(true);
+    });
+  });
+
   stepper.loadSteps = function() {
     var textarea = document.getElementById('steps');
     var steps = textarea.value;
@@ -279,35 +289,83 @@ window.onload = function() {
     });
   };
 
-  // // Parse request body
-  // stepper.addStep('Parse request body', function(done) {
-  //   var jsonText = paper.text(257, 130, '{ ... }');
-  //   requestGroup.add(jsonText);
-  //   var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
-  //   var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
-  //   scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
-  //     scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
-  //       textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
-  //       scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
-  //         scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
-  //           done(true);
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+//   // Generate request ID
+//   stepper.addStep('Generate request ID', function(done) {
+//     var requestId = {}
+//     requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
+//     requestId.idText = paper.text(30, 130, 'ID');
+//     requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
+//     requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+//       requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
+//         requestId.rect.attr({ filter: '' });
+//         requestGroup.add(requestId.group);
+//         requestId.rect.animate({ fill: '#42a5f5' }, 250, function() {
+//           done(true);
+//         });
+//       });
+//     });
+//   });
 
-  // // Pre-hook BL
-  // stepper.addStep('Business Logic pre-hook', function(done) {
-  //   blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
-  //   blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+//   // Parse request body
+//   stepper.addStep('Parse request body', function(done) {
+//     var jsonText = paper.text(257, 130, '{ ... }');
+//     requestGroup.add(jsonText);
+//     var textCover = paper.rect(200, 115, 150, 30).attr({ fill: '#2196f3' });
+//     var scanLine = paper.line(380, 80, 380, 170).attr({ stroke: '#000000', strokeWidth: 3, opacity: 0 });
+//     scanLine.animate({ opacity: 1 }, 750, mina.easeinout, function() {
+//       scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
+//         textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
+//         scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
+//           scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
+//             done(true);
+//           });
+//         });
+//       });
+//     });
+//   });
 
-  //   setTimeout(function() {
-  //     done(true);
-  //   }, 1000);
-  // });
+// // Validate credentials
+//   stepper.addStep('Validate credentials', function(done) {
+//     securityGateLights.blink();
+//     animateBelt();
+//     securityGateGroup.animate({ transform: 't-400' }, 10000, mina.linear)
+//     leftGroup.animate({ transform: 't-750' }, 10000, mina.linear)
+//     setTimeout(function() {
+//       securityGateLights.stopBlink(false);
+//       done(true);
+//     }, 6000);
+//   });
 
+//   // Pre-hook BL
+//   stepper.addStep('Business Logic pre-hook', function(done) {
+//     blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+//     blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
 
+//     setTimeout(function() {
+//       done(true);
+//     }, 6000);
+//   });
+
+//   // Data access
+//   stepper.addStep('Save data', function(done) {
+//     databaseIcon.animate({ x: 200 }, 500, mina.easeout, function() {
+//       var databaseIconBounceDelta = 5;
+//       databaseIconBounce = function() {
+//         databaseIcon.animate({ y: 300 + databaseIconBounceDelta }, 1000, mina.easeinout, databaseIconBounce);
+//         databaseIconBounceDelta = databaseIconBounceDelta * -1;
+//       }
+//       databaseIconBounce();
+//       fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
+//         fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
+//           fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
+//             databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
+//               done(true);
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
 
   var canvasEdge = paper.rect(600, 25, 350, 600).attr({ fill: 'white' });
   canvasEdge.after(sidebarGroup);
