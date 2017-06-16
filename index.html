@@ -21,7 +21,7 @@
           <div class="form-group">
             <div class="form-group label-floating">
               <label class="control-label" for="steps">Tracing JSON</label>
-              <textarea class="form-control" id="steps" rows="10" type="text"></textarea>
+              <textarea class="form-control" id="steps" rows="4" type="text"></textarea>
               <p class="help-block">Paste the JSON included in the X-Kinvey-Tracing header of your request</p>
             </div>
           </div>
@@ -31,9 +31,9 @@
         </form>
       </div>
     </div>
-    <div class="row">
+    <div id="visualizer" class="row hide-initial">
       <div class='pull-right col-md-3'>
-        <button type="button" class="btn btn-default" onclick="stepper.step();">Next Step</button>
+        <button type="button" class="btn btn-raised btn-info" onclick="stepper.step();">Next Step</button>
         <div class='panel panel-default'>
           <div id='step-list' class='list-group'>
 
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div class='col-md-3'>
-        <div class="panel panel-info">
+        <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">Step details</h3>
           </div>

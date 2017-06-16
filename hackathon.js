@@ -176,7 +176,6 @@ window.onload = function() {
         itemCount += 1;
       },
       markItem: function(key, success) {
-        console.log(key + '-label')
         document.getElementById(key + '-label').innerHTML = '<i class="material-icons ' + (success ? 'green' : 'red') + '">' + (success ? 'check' : 'close') + '</i>'
       },
       clearAllItems: function() {
@@ -260,9 +259,9 @@ window.onload = function() {
   conveyorBelt.push(line);
   conveyorBelt.push(paper.line(0, 155, 610, 155).attr({ stroke: '#f1582c', strokeWidth: 5 }));
   var lastOffsetValue = 0;
-  var errorEncountered = false;
+  var stopBeltAnimation = false;
   animateBelt = function() {
-    if (errorEncountered) return
+    if (stopBeltAnimation) return
     Snap.animate(lastOffsetValue, lastOffsetValue-50, function(offsetValue){
       line.attr({ 'strokeDashoffset': offsetValue })
       lastOffsetValue = offsetValue % 400;
@@ -281,12 +280,16 @@ window.onload = function() {
     try {
       steps = JSON.parse(steps);
     } catch (e) {}
+    
+    if (!steps) return
 
     stepper.clearAllItems();
     document.getElementById('start-button').classList.add('disabled');
+    document.getElementById('visualizer').classList.remove('hide-initial');
 
     stepper.addStep('new_request', function(done) {
       requestRect.animate({ transform: 't0,200' }, 1000, mina.bounce, function() {
+        document.getElementById('step-metadata').innerHTML = 'Welcome aboard!'
         done(true);
       });
     });
@@ -295,11 +298,11 @@ window.onload = function() {
       switch (step.key) {
         case 'request_id':
           stepper.addStep(step.key, function(done) {
-            document.getElementById('step-metadata').innerHTML = 'Request id: ' + step.id;
+            document.getElementById('step-metadata').innerHTML = 'Request ID: ' + step.payload.id;
 
             var requestId = {}
             requestId.rect = paper.rect(25, 100, 25, 50).attr({ fill: '#ff5252', filter: shadowFilter });
-            requestId.idText = paper.text(30, 130, 'Id');
+            requestId.idText = paper.text(30, 130, 'ID');
             requestId.group = paper.group(requestId.rect, requestId.idText).attr({ opacity: 0 });
             requestId.group.animate({ opacity: 1 }, 750, mina.easeinout, function() {
               requestId.group.animate({ transform: 't150' }, 400, mina.easein, function() {
@@ -322,9 +325,14 @@ window.onload = function() {
               scanLine.animate({ x1: 200, x2: 200 }, 2000, mina.easeinout, function() {
                 textCover.animate({ transform: textCover.transform().localMatrix.scale(0, 1, 350, 115) }, 1800, mina.easeinout);
                 scanLine.animate({ x1: 380, x2: 380 }, 2000, mina.easeinout, function() {
-                  scanLine.animate({ opacity: 0 }, 250, mina.easeinout, function() {
-                    done(step.error ? false : true);
-                  });
+                  if (step.payload.error) {
+                    document.getElementById('step-metadata').innerHTML = 'Error parsing request body: ' + step.payload.error.body;
+                  }
+                  else {
+                    document.getElementById('step-metadata').innerHTML = 'Successfully parsed request body'
+                  }
+                  done(step.payload.error ? false : true);
+                  scanLine.animate({ opacity: 0 }, 250, mina.easeinout);
                 });
               });
             });
@@ -334,23 +342,38 @@ window.onload = function() {
           stepper.addStep(step.key, function(done) {
             securityGateLights.blink();
             animateBelt();
-            if (true) {
-              document.getElementById('step-metadata').innerHTML = 'Authentication error: ' + step.error.kcs.debug;
+            if (step.payload.error) {
+              if (step.payload.error.kcs) {
+                document.getElementById('step-metadata').innerHTML = 'Authentication error: ' + step.payload.error.kcs.debug;
+              }
+              else {
+                document.getElementById('step-metadata').innerHTML = 'Authentication error!';
+              }
               securityGateGroup.animate({ transform: 't-25' }, 5000, mina.linear)
               leftGroup.animate({ transform: 't-375' }, 5000, mina.linear, function() {
-                errorEncountered = true;
+                stopBeltAnimation = true;
               });
               setTimeout(function() {
-                securityGateLights.stopBlink(step.error ? true : false);
-                done(step.error ? false : true);
+                securityGateLights.stopBlink(step.payload.error ? true : false);
+                done(step.payload.error ? false : true);
               }, 4000);
             } else {
-              document.getElementById('step-metadata').innerHTML = 'Authentication succeded';
+              authInfo = 'Authentication succeeded<br>';
+              authInfo += '<b>API type</b>: ' + (step.payload.unauthedAPI ? 'Unauthenticated' : 'Authenticated' ) + '<br>';
+              authInfo += '<b>User type</b>: ';
+              if (step.payload.isMasterUser) authInfo += 'Master secret';
+              if (step.payload.isAppUser) authInfo += 'App secret';
+              if (step.payload.isEndUser) authInfo += 'End user';
+              authInfo += '<br>';
+              if (step.payload.authType) authInfo += '<b>Authentication type</b>: ' + step.payload.authType + '<br>';
+              if (step.payload.authUsername) authInfo += '<b>Authenticated username</b>: ' + step.payload.authUsername;
+              document.getElementById('step-metadata').innerHTML = authInfo;
+
               securityGateGroup.animate({ transform: 't-400' }, 10000, mina.linear)
               leftGroup.animate({ transform: 't-750' }, 10000, mina.linear)
               setTimeout(function() {
-                securityGateLights.stopBlink(step.error ? true : false);
-                done(step.error ? false : true);
+                securityGateLights.stopBlink(step.payload.error ? true : false);
+                done(step.payload.error ? false : true);
               }, 6000);
             }
           });
@@ -359,9 +382,11 @@ window.onload = function() {
           stepper.addStep('prehook', function(done) {
             blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
             blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
-
+            
+            document.getElementById('step-metadata').innerHTML = 'Duration of execution (in ms): ' + step.payload.duration;
+            
             setTimeout(function() {
-              done(step.error ? false : true);
+              done(step.payload.error ? false : true);
             }, 6000);
           });
           break;
@@ -375,11 +400,13 @@ window.onload = function() {
                 databaseIconBounceDelta = databaseIconBounceDelta * -1;
               }
               databaseIconBounce();
+              document.getElementById('step-metadata').innerHTML = 'Entity successfully saved'
+              if (step.payload._id) document.getElementById('step-metadata').innerHTML += '<br>New entity _id: ' + step.payload._id;
               fileIcon.animate({ opacity: 0.7 }, 1000, mina.easein, function() {
                 fileIcon.animate({ transform: 't0,230' }, 3000, mina.easeinout, function() {
                   fileIcon.animate({ opacity: 0 }, 2500, mina.easein, function() {
                     databaseIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-                      done(step.error ? false : true);
+                      done(step.payload.error ? false : true);
                     });
                   });
                 });
@@ -393,15 +420,17 @@ window.onload = function() {
             blFrontGroup.transform('t500,-370')
             blGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
             blFrontGroup.animate({ transform: 't-400,-370' }, 10000, mina.linear);
+            
+            document.getElementById('step-metadata').innerHTML = 'Duration of execution (in ms): ' + step.payload.duration;
 
             setTimeout(function() {
-              done(step.error ? false : true);
+              done(step.payload.error ? false : true);
             }, 6000);
           });
           break;
         case 'response':
           stepper.addStep('response', function(done) {
-            clientIcon.animate({ x: 251 }, 500, mina.easeout, function() {
+            clientIcon.animate({ x: 239 }, 500, mina.easeout, function() {
               var clientIconBounceDelta = 5;
               clientIconBounce = function() {
                 clientIcon.animate({ y: 300 + clientIconBounceDelta }, 1000, mina.easeinout, clientIconBounce);
@@ -410,9 +439,16 @@ window.onload = function() {
               clientIconBounce();
               requestGroup.animate({ transform: 's0.1' }, 750, mina.linear, function() {
                 requestGroup.animate({ transform: 't0,200s0.1' }, 2000, mina.easeinout, function() {
+                  done(step.payload.error ? false : true);
+                  if (step.payload.error) {
+                    document.getElementById('step-metadata').innerHTML = 'Error response sent to client:<br><b>Status code</b>: ' + step.payload.statusCode + '<br><b>Response body</b>: ' + JSON.stringify(step.payload.error);
+                  }
+                  else {
+                    document.getElementById('step-metadata').innerHTML = 'Response sent to client:<br><b>Status code</b>: ' + step.payload.statusCode;
+                  }
                   requestGroup.animate({ opacity: 0 }, 500, mina.easeinout, function() {
                     clientIcon.animate({ x: 630 }, 500, mina.easeout, function() {
-                      done(step.error ? false : true);
+                      stopBeltAnimation = true;
                     });
                   });
                 });
